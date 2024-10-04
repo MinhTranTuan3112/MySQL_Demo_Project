@@ -6,6 +6,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.util.Log;
 import android.view.View;
 
 import androidx.navigation.NavController;
@@ -18,6 +19,10 @@ import com.example.mysql_demo_project.databinding.ActivityMainBinding;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.sql.Connection;
+import java.util.Arrays;
+import java.util.Objects;
+
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration appBarConfiguration;
@@ -26,6 +31,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        try {
+            Connection conn = DbUtils.makeConnection();
+
+            Log.v("test", conn.toString());
+
+            conn.close();
+        } catch (Exception ex) {
+            Log.e("error", Arrays.toString(ex.getStackTrace()));
+        }
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
