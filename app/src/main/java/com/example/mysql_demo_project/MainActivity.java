@@ -18,10 +18,13 @@ import com.example.mysql_demo_project.databinding.ActivityMainBinding;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,16 +34,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        try {
-            Connection conn = DbUtils.makeConnection();
-
-            Log.v("test", conn.toString());
-
-            conn.close();
-        } catch (Exception ex) {
-            Log.e("error", Arrays.toString(ex.getStackTrace()));
-        }
+        connect();
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -54,13 +48,34 @@ public class MainActivity extends AppCompatActivity {
         binding.fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAnchorView(R.id.fab)
                         .setAction("Action", null).show();
             }
         });
     }
+    public void connect(){
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(() ->{
+            try {
+                Connection conn = DbUtils.makeConnection();
+                Log.v("test", conn.toString());
+                conn.close();
+            } catch (Exception ex) {
+                Log.e("error", Arrays.toString(ex.getStackTrace()));
+            }
 
+            runOnUiThread(() -> {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e){
+                    Log.e("error", Arrays.toString(e.getStackTrace()));
+                }
+            });
+        });
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
