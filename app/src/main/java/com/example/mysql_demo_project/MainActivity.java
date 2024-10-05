@@ -2,106 +2,74 @@ package com.example.mysql_demo_project;
 
 import android.os.Bundle;
 
-import com.google.android.material.snackbar.Snackbar;
-
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import android.util.Log;
-import android.view.View;
+import android.widget.ListView;
 
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-
-import com.example.mysql_demo_project.databinding.ActivityMainBinding;
-
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.Toast;
+import com.example.mysql_demo_project.interfaces.IProductRepository;
+import com.example.mysql_demo_project.repos.ProductRepository;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
-    private AppBarConfiguration appBarConfiguration;
-    private ActivityMainBinding binding;
+    private ListView lvProducts;
+    private ProductsAdapter productsAdapter;
+    private IProductRepository productRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        connect();
-
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-
-        setSupportActionBar(binding.toolbar);
-
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-
-        binding.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAnchorView(R.id.fab)
-                        .setAction("Action", null).show();
-            }
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_main);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
         });
+
+        //Binding
+        lvProducts = findViewById(R.id.lvProducts);
+
+        productRepository = new ProductRepository();
+
+        loadProducts();
+
     }
-    public void connect(){
+
+    public void loadProducts(){
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.execute(() ->{
             try {
-                Connection conn = DbUtils.makeConnection();
-                Log.v("test", conn.toString());
-                conn.close();
+
+                ArrayList<Product> products = productRepository.getProducts();
+
+                runOnUiThread(() -> {
+                    productsAdapter = new ProductsAdapter(MainActivity.this, products);
+
+                    lvProducts.setAdapter(productsAdapter);
+                });
+
             } catch (Exception ex) {
                 Log.e("error", Arrays.toString(ex.getStackTrace()));
             }
 
-            runOnUiThread(() -> {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e){
-                    Log.e("error", Arrays.toString(e.getStackTrace()));
-                }
-            });
+//            runOnUiThread(() -> {
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e){
+//                    Log.e("error", Arrays.toString(e.getStackTrace()));
+//                }
+//            });
         });
-    }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        return NavigationUI.navigateUp(navController, appBarConfiguration)
-                || super.onSupportNavigateUp();
     }
 }

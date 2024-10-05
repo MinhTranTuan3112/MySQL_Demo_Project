@@ -41,7 +41,8 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
-    implementation("mysql:mysql-connector-java:5.1.49") // Use the specific version you need
+    implementation("mysql:mysql-connector-java:5.1.49")
+    implementation(libs.activity) // Use the specific version you need
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

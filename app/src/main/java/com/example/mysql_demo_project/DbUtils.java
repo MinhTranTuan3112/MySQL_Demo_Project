@@ -12,7 +12,7 @@ public class DbUtils {
         Connection cn = null;
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            String connectionString = "jdbc:mysql://10.0.2.2:3306/demo_prm_pb";
+            String connectionString = "jdbc:mysql://10.0.2.2:3306/demo_prm_db";
             cn =  DriverManager.getConnection(connectionString,"root","12345");
         }catch (Exception e){
             Log.e("ERROR", Objects.requireNonNull(e.getMessage()));
