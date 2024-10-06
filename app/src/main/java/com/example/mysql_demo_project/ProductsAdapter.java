@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
+
 import com.example.mysql_demo_project.utils.PriceUtils;
 
 import java.util.ArrayList;
@@ -16,6 +18,7 @@ public class ProductsAdapter extends BaseAdapter {
     private Context context;
     private ArrayList<Product> products;
     private LayoutInflater inflater;
+    public int selectingId = 0;
 
     public ProductsAdapter(Context context, ArrayList<Product> products) {
         this.context = context;
@@ -36,7 +39,12 @@ public class ProductsAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int i) {
-        return i;
+        return products.get(i).id;
+    }
+
+
+    public void setProducts(ArrayList<Product> products) {
+        this.products = products;
     }
 
     @Override
@@ -53,6 +61,10 @@ public class ProductsAdapter extends BaseAdapter {
 
         tvName.setText(product.name);
         tvPrice.setText(PriceUtils.formatPrice(product.price));
+
+        int backgroundColorId = (product.id == selectingId) ? R.color.colorItemSelected : android.R.color.transparent;
+
+        view.setBackgroundColor(ContextCompat.getColor(context, backgroundColorId));
 
         return view;
     }

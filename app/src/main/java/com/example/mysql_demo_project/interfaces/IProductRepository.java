@@ -7,4 +7,5 @@ import java.util.ArrayList;
 
 public interface IProductRepository {
     ArrayList<Product> getProducts() throws SQLException;
+    void deleteProduct(int id) throws SQLException;
 }
