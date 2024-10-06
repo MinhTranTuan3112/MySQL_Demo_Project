@@ -49,6 +49,7 @@ public class ProductRepository implements IProductRepository {
 
         return products;
     }
+
     @Override
     public void createProduct(String name, double price) throws SQLException {
         Connection conn = null;
@@ -69,6 +70,7 @@ public class ProductRepository implements IProductRepository {
             }
         }
     }
+
     @Override
     public void deleteProduct(int id) throws SQLException {
         Connection conn = null;
@@ -88,4 +90,37 @@ public class ProductRepository implements IProductRepository {
             }
         }
     }
+
+    @Override
+    public ArrayList<Product> searchProduct(String name) throws SQLException {
+        ArrayList<Product> products = new ArrayList<>();
+        Connection conn = null;
+        try {
+            conn = DbUtils.makeConnection();
+            String query = "select * from product where lower(name) like ?";
+            PreparedStatement ps = conn.prepareStatement(query);
+            ps.setString(1, "%"+ name + "%");
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs != null) {
+                while (rs.next()) {
+                    int id = rs.getInt("id");
+                    String pname = rs.getString("name");
+                    double price = rs.getDouble("price");
+
+                    products.add(new Product(id, pname, price));
+                }
+            }
+
+        } catch (Exception ex) {
+            Log.e("ERROR", Objects.requireNonNull(ex.getMessage()));
+        } finally {
+            if (conn != null && !conn.isClosed()) {
+                conn.close();
+            }
+        }
+        return products;
+    }
 }
+
