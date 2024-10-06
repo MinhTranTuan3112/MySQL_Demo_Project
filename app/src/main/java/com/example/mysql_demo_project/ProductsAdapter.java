@@ -42,6 +42,11 @@ public class ProductsAdapter extends BaseAdapter {
         return products.get(i).id;
     }
 
+
+    public void setProducts(ArrayList<Product> products) {
+        this.products = products;
+    }
+
     @Override
     public View getView(int index, View view, ViewGroup viewGroup) {
 

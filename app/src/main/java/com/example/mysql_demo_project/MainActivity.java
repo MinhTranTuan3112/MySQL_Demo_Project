@@ -30,14 +30,31 @@ public class MainActivity extends AppCompatActivity {
     private Button btnDelete;
 
     private void performDeleteProduct(int productId) {
-        try {
-            productRepository.deleteProduct(productsAdapter.selectingId);
-            DialogUtils.toastMessage(MainActivity.this, "Deleted product!");
-            productsAdapter.notifyDataSetChanged();
 
-        } catch (Exception ex) {
-            Log.e("ERROR", Objects.requireNonNull(ex.getMessage()));
+        if (productId <= 0) {
+            return;
         }
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+        executorService.execute(() -> {
+            try {
+                productRepository.deleteProduct(productsAdapter.selectingId);
+                ArrayList<Product> products = productRepository.getProducts();
+
+                runOnUiThread(() -> {
+                    DialogUtils.toastMessage(MainActivity.this, "Deleted product!");
+
+                    productsAdapter.setProducts(products);
+                    productsAdapter.selectingId = 0;
+                    productsAdapter.notifyDataSetChanged();
+                });
+
+            } catch (Exception ex) {
+                Log.e("ERROR", Objects.requireNonNull(ex.getMessage()));
+            }
+        });
+
     }
 
     @Override
@@ -60,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         loadProducts();
 
         lvProducts.setOnItemClickListener((adapterView, view, i, l) -> {
-            productsAdapter.selectingId = (int)productsAdapter.getItemId(i);
+            productsAdapter.selectingId = (int) productsAdapter.getItemId(i);
             productsAdapter.notifyDataSetChanged();
         });
 
