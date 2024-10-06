@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private ListView lvProducts;
     private ProductsAdapter productsAdapter;
     private IProductRepository productRepository;
-    private Button btnDelete, btnAdd, btnEdit;
+    private Button btnDelete, btnAdd, btnEdit, btnSearch;
     private EditText etName, etPrice;
 
     private void performDeleteProduct(int productId) {
@@ -80,6 +80,31 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void performSearchProduct() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(() -> {
+            try {
+                // Pass the search text from EditText to searchProduct
+                String searchText = etName.getText().toString();
+                ArrayList<Product> products = productRepository.searchProduct(searchText);
+
+                runOnUiThread(() -> {
+                    DialogUtils.toastMessage(MainActivity.this, "Search complete!");
+
+                    productsAdapter.setProducts(products);
+                    productsAdapter.selectingId = 0;
+                    productsAdapter.notifyDataSetChanged();
+                });
+
+            } catch (Exception ex) {
+                Log.e("ERROR", Objects.requireNonNull(ex.getMessage()));
+            } finally {
+                // Shut down the ExecutorService after the task is complete
+                executorService.shutdown();
+            }
+        });
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
         btnDelete = findViewById(R.id.btnDelete);
         btnEdit = findViewById(R.id.btnEdit);
         btnAdd = findViewById(R.id.btnAdd);
+        btnSearch = findViewById(R.id.btnSearch);
         etPrice = findViewById(R.id.etPrice);
         etName = findViewById(R.id.etName);
 
@@ -114,6 +140,9 @@ public class MainActivity extends AppCompatActivity {
         });
         btnAdd.setOnClickListener(view -> {
             performCreateProduct();
+        });
+        btnSearch.setOnClickListener(view -> {
+            performSearchProduct();
         });
 
     }
