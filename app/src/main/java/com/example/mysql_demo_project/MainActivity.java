@@ -10,6 +10,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import android.util.Log;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import com.example.mysql_demo_project.interfaces.IProductRepository;
@@ -27,7 +28,8 @@ public class MainActivity extends AppCompatActivity {
     private ListView lvProducts;
     private ProductsAdapter productsAdapter;
     private IProductRepository productRepository;
-    private Button btnDelete;
+    private Button btnDelete, btnAdd, btnEdit;
+    private EditText etName, etPrice;
 
     private void performDeleteProduct(int productId) {
 
@@ -56,6 +58,27 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+    private void performCreateProduct() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(() -> {
+            try {
+                productRepository.createProduct(etName.getText().toString(),Double.parseDouble(etPrice.getText().toString()));
+                ArrayList<Product> products = productRepository.getProducts();
+
+                runOnUiThread(() -> {
+                    DialogUtils.toastMessage(MainActivity.this, "Created product!");
+
+                    productsAdapter.setProducts(products);
+                    productsAdapter.selectingId = 0;
+                    productsAdapter.notifyDataSetChanged();
+                });
+
+            } catch (Exception ex) {
+                Log.e("ERROR", Objects.requireNonNull(ex.getMessage()));
+            }
+        });
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +94,10 @@ public class MainActivity extends AppCompatActivity {
         //Binding
         lvProducts = findViewById(R.id.lvProducts);
         btnDelete = findViewById(R.id.btnDelete);
+        btnEdit = findViewById(R.id.btnEdit);
+        btnAdd = findViewById(R.id.btnAdd);
+        etPrice = findViewById(R.id.etPrice);
+        etName = findViewById(R.id.etName);
 
         productRepository = new ProductRepository();
 
@@ -84,6 +111,9 @@ public class MainActivity extends AppCompatActivity {
         btnDelete.setOnClickListener(view -> {
             DialogUtils.showConfirmationDialog(MainActivity.this, "Confirm", "Delete this product?",
                     () -> performDeleteProduct(productsAdapter.selectingId));
+        });
+        btnAdd.setOnClickListener(view -> {
+            performCreateProduct();
         });
 
     }

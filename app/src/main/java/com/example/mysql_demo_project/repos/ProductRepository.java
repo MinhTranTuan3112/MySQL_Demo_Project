@@ -49,7 +49,26 @@ public class ProductRepository implements IProductRepository {
 
         return products;
     }
+    @Override
+    public void createProduct(String name, double price) throws SQLException {
+        Connection conn = null;
+        try {
+            conn = DbUtils.makeConnection();
+            String query = "INSERT INTO product (name, price) VALUES (?, ?)";
+            PreparedStatement ps = conn.prepareStatement(query);
+            ps.setString(1, name);
+            ps.setDouble(2, price);
 
+            ps.executeUpdate();
+
+        } catch (Exception ex) {
+            Log.e("ERROR", Objects.requireNonNull(ex.getMessage()));
+        } finally {
+            if (conn != null && !conn.isClosed()) {
+                conn.close();
+            }
+        }
+    }
     @Override
     public void deleteProduct(int id) throws SQLException {
         Connection conn = null;
