@@ -18,9 +18,10 @@ public class ProductRepository implements IProductRepository {
     @Override
     public ArrayList<Product> getProducts() throws SQLException {
         ArrayList<Product> products = new ArrayList<>();
+        Connection conn = null;
 
-        try (Connection conn = DbUtils.makeConnection()) {
-
+        try {
+            conn = DbUtils.makeConnection();
             String query = "select * from product";
 
             PreparedStatement ps = conn.prepareStatement(query);
@@ -40,8 +41,32 @@ public class ProductRepository implements IProductRepository {
 
         } catch (Exception ex) {
             Log.e("ERROR", Objects.requireNonNull(ex.getMessage()));
+        } finally {
+            if (conn != null && !conn.isClosed()) {
+                conn.close();
+            }
         }
 
         return products;
+    }
+
+    @Override
+    public void deleteProduct(int id) throws SQLException {
+        Connection conn = null;
+        try {
+            conn = DbUtils.makeConnection();
+            String query = "delete from product where id = ?";
+            PreparedStatement ps = conn.prepareStatement(query);
+            ps.setInt(1, id);
+
+            ps.executeUpdate();
+
+        } catch (Exception ex) {
+            Log.e("ERROR", Objects.requireNonNull(ex.getMessage()));
+        } finally {
+            if (conn != null && !conn.isClosed()) {
+                conn.close();
+            }
+        }
     }
 }

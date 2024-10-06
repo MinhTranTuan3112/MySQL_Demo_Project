@@ -9,14 +9,16 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import android.util.Log;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.example.mysql_demo_project.interfaces.IProductRepository;
 import com.example.mysql_demo_project.repos.ProductRepository;
+import com.example.mysql_demo_project.utils.DialogUtils;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -25,6 +27,18 @@ public class MainActivity extends AppCompatActivity {
     private ListView lvProducts;
     private ProductsAdapter productsAdapter;
     private IProductRepository productRepository;
+    private Button btnDelete;
+
+    private void performDeleteProduct(int productId) {
+        try {
+            productRepository.deleteProduct(productsAdapter.selectingId);
+            DialogUtils.toastMessage(MainActivity.this, "Deleted product!");
+            productsAdapter.notifyDataSetChanged();
+
+        } catch (Exception ex) {
+            Log.e("ERROR", Objects.requireNonNull(ex.getMessage()));
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,16 +53,27 @@ public class MainActivity extends AppCompatActivity {
 
         //Binding
         lvProducts = findViewById(R.id.lvProducts);
+        btnDelete = findViewById(R.id.btnDelete);
 
         productRepository = new ProductRepository();
 
         loadProducts();
 
+        lvProducts.setOnItemClickListener((adapterView, view, i, l) -> {
+            productsAdapter.selectingId = (int)productsAdapter.getItemId(i);
+            productsAdapter.notifyDataSetChanged();
+        });
+
+        btnDelete.setOnClickListener(view -> {
+            DialogUtils.showConfirmationDialog(MainActivity.this, "Confirm", "Delete this product?",
+                    () -> performDeleteProduct(productsAdapter.selectingId));
+        });
+
     }
 
-    public void loadProducts(){
+    public void loadProducts() {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        executorService.execute(() ->{
+        executorService.execute(() -> {
             try {
 
                 ArrayList<Product> products = productRepository.getProducts();
