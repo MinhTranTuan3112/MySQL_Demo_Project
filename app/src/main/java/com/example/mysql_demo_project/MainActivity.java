@@ -157,6 +157,11 @@ public class MainActivity extends AppCompatActivity {
         loadProducts();
 
         lvProducts.setOnItemClickListener((adapterView, view, i, l) -> {
+            //Get the selected product based on position (Name + Price)
+            Product selectedProduct = (Product) productsAdapter.getItem(i);
+            etName.setText(selectedProduct.name);
+            etPrice.setText(String.valueOf(selectedProduct.price));
+
             productsAdapter.selectingId = (int) productsAdapter.getItemId(i);
             productsAdapter.notifyDataSetChanged();
         });
