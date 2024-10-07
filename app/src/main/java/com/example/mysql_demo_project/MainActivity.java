@@ -58,11 +58,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
     private void performCreateProduct() {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.execute(() -> {
             try {
-                productRepository.createProduct(etName.getText().toString(),Double.parseDouble(etPrice.getText().toString()));
+                productRepository.createProduct(etName.getText().toString(), Double.parseDouble(etPrice.getText().toString()));
                 ArrayList<Product> products = productRepository.getProducts();
 
                 runOnUiThread(() -> {
@@ -78,6 +79,32 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void performUpdateProduct(int productId) {
+        if (productId <= 0) {
+            return;
+        }
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+        executorService.execute(() -> {
+            try {
+                String updatedName = etName.getText().toString();
+                double updatedPrice = Double.parseDouble(etPrice.getText().toString());
+                productRepository.updateProduct(productId, updatedName, updatedPrice);
+                ArrayList<Product> products = productRepository.getProducts();
+
+                runOnUiThread(() -> {
+                    DialogUtils.toastMessage(MainActivity.this, "Updated product!");
+
+                    productsAdapter.setProducts(products);
+                    productsAdapter.notifyDataSetChanged();
+                });
+            } catch (Exception ex) {
+                Log.e("ERROR", Objects.requireNonNull(ex.getMessage()));
+            }
+        });
     }
 
     private void performSearchProduct() {
@@ -143,6 +170,11 @@ public class MainActivity extends AppCompatActivity {
         });
         btnSearch.setOnClickListener(view -> {
             performSearchProduct();
+        });
+
+        btnEdit.setOnClickListener(view -> {
+            DialogUtils.showConfirmationDialog(MainActivity.this, "Confirm", "Update this product?",
+                    () -> performUpdateProduct(productsAdapter.selectingId));
         });
 
     }

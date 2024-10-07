@@ -122,5 +122,24 @@ public class ProductRepository implements IProductRepository {
         }
         return products;
     }
-}
 
+    @Override
+    public void updateProduct(int id, String name, double price) throws SQLException {
+        Connection connection = null;
+        try {
+            connection = DbUtils.makeConnection();
+            String query = "UPDATE product SET name = ?, price = ? WHERE id = ?";
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setString(1, name);
+            ps.setDouble(2, price);
+            ps.setInt(3, id);
+            ps.executeUpdate();
+        } catch (Exception ex) {
+            Log.e("ERROR", Objects.requireNonNull(ex.getMessage()));
+        } finally {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        }
+    }
+}
