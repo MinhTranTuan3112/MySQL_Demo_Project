@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private ListView lvProducts;
     private ProductsAdapter productsAdapter;
     private IProductRepository productRepository;
-    private Button btnDelete, btnAdd, btnEdit;
+    private Button btnDelete, btnAdd, btnUpdate;
     private EditText etName, etPrice;
 
     private void performDeleteProduct(int productId) {
@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
         //Binding
         lvProducts = findViewById(R.id.lvProducts);
         btnDelete = findViewById(R.id.btnDelete);
-        btnEdit = findViewById(R.id.btnEdit);
+        btnUpdate = findViewById(R.id.btnUpdate);
         btnAdd = findViewById(R.id.btnAdd);
         etPrice = findViewById(R.id.etPrice);
         etName = findViewById(R.id.etName);
@@ -104,6 +104,11 @@ public class MainActivity extends AppCompatActivity {
         loadProducts();
 
         lvProducts.setOnItemClickListener((adapterView, view, i, l) -> {
+            //Get the seleceted product based on position (Name + Price)
+            Product selectedProduct = (Product) productsAdapter.getItem(i);
+            etName.setText(selectedProduct.name);
+            etPrice.setText(String.valueOf(selectedProduct.price));
+
             productsAdapter.selectingId = (int) productsAdapter.getItemId(i);
             productsAdapter.notifyDataSetChanged();
         });
@@ -116,7 +121,39 @@ public class MainActivity extends AppCompatActivity {
             performCreateProduct();
         });
 
+        btnUpdate.setOnClickListener(view -> {
+            DialogUtils.showConfirmationDialog(MainActivity.this, "Confirm", "Update this product?",
+                    () -> performUpdateProduct(productsAdapter.selectingId));
+        });
     }
+
+    private void performUpdateProduct(int productId) {
+        if (productId <= 0) {
+            return;
+        }
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+        executorService.execute(() -> {
+            try {
+                String updatedName = etName.getText().toString();
+                double updatedPrice = Double.parseDouble(etPrice.getText().toString());
+                productRepository.updateProduct(productId, updatedName, updatedPrice);
+                ArrayList<Product> products = productRepository.getProducts();
+
+                runOnUiThread(() -> {
+                    DialogUtils.toastMessage(MainActivity.this, "Updated product!");
+
+                    productsAdapter.setProducts(products);
+                    productsAdapter.notifyDataSetChanged();
+                });
+            }
+            catch (Exception ex) {
+                Log.e("ERROR", Objects.requireNonNull(ex.getMessage()));
+            }
+        });
+    }
+
 
     public void loadProducts() {
         ExecutorService executorService = Executors.newSingleThreadExecutor();

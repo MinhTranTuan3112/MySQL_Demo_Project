@@ -9,4 +9,5 @@ public interface IProductRepository {
     ArrayList<Product> getProducts() throws SQLException;
     void createProduct(String name, double price) throws SQLException;
     void deleteProduct(int id) throws SQLException;
+    void updateProduct(int id, String name, double price) throws SQLException;
 }
